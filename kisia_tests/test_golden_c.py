@@ -2,7 +2,7 @@
 
 **이 파일이 통과한다는 사실은 유형 C가 옳다는 증거가 아니다**(`CLAUDE.md` §6.1-3).
 근거는 실제 컨테이너 위의 집합 판정이고, 그 원본은
-`docs/rebuild/judgments/2026-08-09-r6-golden-c/` 다.
+`kisia_tests/data/streams/2026-08-09-r6-golden-c/` 다.
 
 **잠그는 것**
 

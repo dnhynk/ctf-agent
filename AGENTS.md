@@ -15,11 +15,14 @@ Rules for coding agents that change this repository. The linked documents give t
   Docker socket, a host bind mount or network egress.
 - Do not add automatic flag submission. `docs/canon/SAFETY_SCOPE.md` lists the conditions that
   must hold first.
-- `vendor/` stays byte-identical to upstream SWE-agent v0.7.0. Change it only through a patch in
-  `vendor/patches/` that is also listed in `docs/spec/SEAM_IMPLEMENTATION_MAP.md` §5. If a third
-  structural patch seems necessary, stop and report. `kisia_tests/test_vendor_boundary.py`
-  checks the upstream hashes, fails at the third structural patch and allows a single product
-  file (`kisia/runtime/session.py`) to import vendored code.
+- Files under `vendor/` match upstream SWE-agent v0.7.0 byte for byte, except four files changed
+  by patches V-02 to V-06 in `vendor/patches/`. Change `vendor/` only through a new patch in
+  `vendor/patches/` that is also listed in `docs/spec/SEAM_IMPLEMENTATION_MAP.md` §5. That table
+  shows only a planned V-01; V-02 to V-06 were recorded in `docs/rebuild/REBUILD_LOG.md`, which
+  is not in this snapshot. If a third structural patch seems necessary, stop and report.
+  `kisia_tests/test_vendor_boundary.py` checks the upstream hashes and the hash of each patched
+  file, fails at the third structural patch and allows a single product file
+  (`kisia/runtime/session.py`) to import vendored code.
 - `docs/spike/` holds recorded evidence and fixture bytes. Do not edit it. Ruff excludes it so
   that `--fix` cannot rewrite those bytes.
 - Report that something works only together with the command you ran and its output. A passing
