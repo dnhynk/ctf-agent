@@ -1,0 +1,18 @@
+--- a/sweagent/environment/utils.py
++++ b/sweagent/environment/utils.py
+@@ -444,7 +444,17 @@
+     logger.debug(f"Starting interactive session {session_name} with command: {shlex.join(startup_cmd)}")
+     session = subprocess.Popen(startup_cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, text=True, bufsize=1)
+     time.sleep(DOCKER_START_UP_DELAY)
+-    _ = read_with_timeout(session, lambda: list(), timeout_duration=1)
++    # V-06 (재빌드-5, 구조). upstream 은 여기서
++    #     _ = read_with_timeout(session, lambda: list(), timeout_duration=1)
++    # 로 시작 출력을 읽고 **버렸다.** `spec.md` §4 는 `open` 이 `banner_observation_id`
++    # 를 내라고 요구하고, `SEAM_IMPLEMENTATION_MAP.md` §3.4 가 "배너 보존"을 재빌드의
++    # 일로 적는다. 읽지 않고 파이프에 남겨 두면 어댑터가 **raw 바이트**로 받는다 —
++    # 반환값을 갈무리하는 형태로는 정규화된 str(`\r\n`→`\n`, 끝 개행 제거)만 남아
++    # 바이트 회계가 서지 않는다.
++    #
++    # 함께 사라지는 것 하나: 이 호출은 시작 직후 죽은 세션을 `RuntimeError` 로 알리는
++    # 자리이기도 했다. 어댑터가 `poll()` 로 직접 확인한다.
+     return InteractiveSession(name=session_name, session_process=session)

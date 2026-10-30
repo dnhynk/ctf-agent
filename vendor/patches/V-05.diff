@@ -1,0 +1,24 @@
+--- a/sweagent/utils/config.py
++++ b/sweagent/utils/config.py
+@@ -4,9 +4,9 @@
+ from pathlib import Path
+ from typing import Any
+ 
+-import config as config_file
+-from sweagent import REPO_ROOT
+-from sweagent.utils.log import get_logger
++config_file = None  # KISIA V-05: PyPI `config` 미반입. keys.cfg 가 없으면 닿지 않는 분기다
++from .. import REPO_ROOT
++from .log import get_logger
+ 
+ logger = get_logger("config")
+ 
+@@ -36,7 +36,7 @@
+         """
+         if keys_cfg_path is None:
+             # Defer import to avoid circular import
+-            from sweagent import PACKAGE_DIR
++            from .. import PACKAGE_DIR
+ 
+             keys_cfg_path = PACKAGE_DIR.parent / "keys.cfg"
+         self._keys_cfg = None

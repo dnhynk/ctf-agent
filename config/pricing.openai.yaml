@@ -1,0 +1,68 @@
+# Operator-supplied pricing. The application never scrapes or infers a price: a model used
+# without a matching entry here fails with CONFIG_INVALID_PRICING and blocks further paid
+# attempts, rather than treating the cost as zero and silently disabling the USD cap.
+#
+# `gpt-5.3-codex` is deliberately absent. The pricing page lists no cache-write rate for it, and
+# `usd_per_million_cache_write` is required precisely so that a model whose cache writes have no
+# published price cannot be charged at an invented one. Selecting it fails with
+# CONFIG_INVALID_PRICING, which is the correct outcome until the rate is found or the model is
+# shown not to cache. It has no long-context tier either, so that part is not the obstacle.
+#
+# Rates below were retrieved on 2026-08-05 from
+# https://developers.openai.com/api/docs/pricing and the model page
+# https://developers.openai.com/api/docs/models/gpt-5.6-terra, which states the premium tier as
+# "2x input and 1.5x output for the full request" above 272K input tokens, and cache writes at
+# 1.25x the uncached input rate.
+#
+# Cache writes are a priced subset of the reported input, not an extra quantity. Six real calls
+# showed `total_tokens == input + output` every time and `cached + cache_write + 3 == input` every
+# time, so the documented 1.25x is a rate substitution on part of the input. See `price_usage`.
+schema_version: 1
+prices:
+  - model: gpt-5.6-terra
+    usd_per_million_input: "2.000000000000"
+    usd_per_million_cached_input: "0.200000000000"
+    usd_per_million_cache_write: "2.500000000000"
+    usd_per_million_output: "12.000000000000"
+    # Above this input size the whole request is repriced, not just the excess.
+    long_context_threshold_tokens: 272000
+    usd_per_million_input_long: "4.000000000000"
+    usd_per_million_cached_input_long: "0.400000000000"
+    usd_per_million_cache_write_long: "5.000000000000"
+    usd_per_million_output_long: "18.000000000000"
+    source_url: https://developers.openai.com/api/docs/pricing
+    effective_at: 2026-08-05T00:00:00Z
+    retrieved_at: 2026-08-05T00:00:00Z
+    approved_by: dnhynk
+
+  # https://developers.openai.com/api/docs/models/gpt-5.6-luna - same 272K threshold as terra.
+  - model: gpt-5.6-luna
+    usd_per_million_input: "0.200000000000"
+    usd_per_million_cached_input: "0.020000000000"
+    usd_per_million_cache_write: "0.250000000000"
+    usd_per_million_output: "1.200000000000"
+    long_context_threshold_tokens: 272000
+    usd_per_million_input_long: "0.400000000000"
+    usd_per_million_cached_input_long: "0.040000000000"
+    usd_per_million_cache_write_long: "0.500000000000"
+    usd_per_million_output_long: "1.800000000000"
+    source_url: https://developers.openai.com/api/docs/pricing
+    effective_at: 2026-08-06T00:00:00Z
+    retrieved_at: 2026-08-06T00:00:00Z
+    approved_by: dnhynk
+
+  # https://developers.openai.com/api/docs/models/gpt-5.6-sol - same 272K threshold as terra.
+  - model: gpt-5.6-sol
+    usd_per_million_input: "5.000000000000"
+    usd_per_million_cached_input: "0.500000000000"
+    usd_per_million_cache_write: "6.250000000000"
+    usd_per_million_output: "30.000000000000"
+    long_context_threshold_tokens: 272000
+    usd_per_million_input_long: "10.000000000000"
+    usd_per_million_cached_input_long: "1.000000000000"
+    usd_per_million_cache_write_long: "12.500000000000"
+    usd_per_million_output_long: "45.000000000000"
+    source_url: https://developers.openai.com/api/docs/pricing
+    effective_at: 2026-08-06T00:00:00Z
+    retrieved_at: 2026-08-06T00:00:00Z
+    approved_by: dnhynk

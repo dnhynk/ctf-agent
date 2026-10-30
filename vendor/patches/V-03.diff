@@ -1,0 +1,23 @@
+--- a/sweagent/environment/utils.py
++++ b/sweagent/environment/utils.py
+@@ -16,17 +16,9 @@
+ from subprocess import PIPE, STDOUT
+ from typing import Any, Callable
+ 
+-from datasets import load_dataset, load_from_disk
+-from ghapi.all import GhApi
+-from git import InvalidGitRepositoryError, Repo
+-from unidiff import PatchSet
+-
+-import docker
+-import docker.types
+-from docker.models.containers import Container
+-from sweagent.agent.interactive_commands import InteractiveSession
+-from sweagent.utils.config import keys_config
+-from sweagent.utils.log import get_logger
++from ..agent.interactive_commands import InteractiveSession
++from ..utils.config import keys_config
++from ..utils.log import get_logger
+ 
+ DOCKER_START_UP_DELAY = float(keys_config.get("SWE_AGENT_DOCKER_START_UP_DELAY", 1))
+ DOCKER_COMPOSE_TERMINATION_DELAY = float(keys_config.get("SWE_AGENT_DOCKER_START_UP_DELAY", 100))

@@ -1,0 +1,16 @@
+--- a/sweagent/utils/log.py
++++ b/sweagent/utils/log.py
+@@ -4,7 +4,12 @@
+ import os
+ from pathlib import PurePath
+ 
+-from rich.logging import RichHandler
++
++
++class RichHandler(logging.StreamHandler):  # KISIA V-04: rich 를 대신하는 표준 라이브러리 shim
++    def __init__(self, *, show_time: bool = False, show_path: bool = False) -> None:
++        super().__init__()
++        self.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s" if show_time else "%(levelname)s %(message)s"))
+ 
+ _SET_UP_LOGGERS = set()
+ _ADDITIONAL_HANDLERS = []

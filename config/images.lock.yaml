@@ -1,0 +1,43 @@
+# Pinned worker image digests. Written by `kisia runtime build`, reviewed and committed by hand.
+#
+# `kisia doctor --docker` compares three independent statements: this lock, the org.kisia.* labels
+# on the local image, and the host's HELPER_PROTOCOL_VERSION code contract. A profile with no
+# entry cannot start a worker.
+images:
+  base:
+    built_at: '2026-08-06T02:15:26.162387Z'
+    digest: sha256:5e804157b844040fd6a9903c9e3ed5351f5a9c7069c84f9fc27fcc5257a2d321
+    helper_protocol_version: 4
+    profile: base
+    reference: kisia/worker-base:phase-a
+  crypto:
+    built_at: '2026-08-06T02:17:00.053388Z'
+    digest: sha256:e2fe8225f426a511e251ad4f2da8728d10d85836e7f0a2b5f5aaea99b63ba4e6
+    helper_protocol_version: 4
+    profile: crypto
+    reference: kisia/worker-crypto:phase-a
+  forensics:
+    built_at: '2026-08-06T02:17:13.950007Z'
+    digest: sha256:094ad95e0e3168419f46ad2c94929a8ff7e68026bc8eb44069fe33f7256248c7
+    helper_protocol_version: 4
+    profile: forensics
+    reference: kisia/worker-forensics:phase-a
+  pwn:
+    built_at: '2026-08-06T02:16:06.690853Z'
+    digest: sha256:4afd11918e207bf704724aefeda500453be729c5826c9e9e5737e844f5974a3c
+    helper_protocol_version: 4
+    profile: pwn
+    reference: kisia/worker-pwn:phase-a
+  rev:
+    built_at: '2026-08-06T02:16:23.487139Z'
+    digest: sha256:a38b3eda5d9c35d657429063caa905553447e0af458920d4fe7007643a8c5055
+    helper_protocol_version: 4
+    profile: rev
+    reference: kisia/worker-rev:phase-a
+  web:
+    built_at: '2026-08-06T02:16:36.316604Z'
+    digest: sha256:3aff43d9e91c2b6f4af08361c530cf01b1d427e7f63b4c66ac687e91c78bd321
+    helper_protocol_version: 4
+    profile: web
+    reference: kisia/worker-web:phase-a
+schema_version: 1

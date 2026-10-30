@@ -1,0 +1,105 @@
+# 재빌드가 쓰는 이미지의 digest 고정.
+#
+# **`config/images.lock.yaml` 을 고치지 않고 새 파일을 만든다** — `PATH_SCOPE.md` §3.6 이
+# 그 셋을 읽기 전용 입력으로 정하고 "새 값이 필요하면 새 파일을 만들고 그 사실을
+# `REBUILD_LOG.md` 에 적는다"고 요구한다. 기존 파일을 고치면 스파이크의 비용 재계산이
+# 재현되지 않는다.
+#
+# **`digest` 는 이미지 ID 다** (`docker image inspect --format {{.Id}}`). 레지스트리에
+# 올리지 않으므로 RepoDigest 가 없고, `config/images.lock.yaml` 의 여섯 항목도 같은 형태다
+# (`kisia/worker-base:phase-a` → `sha256:5e804157…` = 그 이미지의 ID).
+#
+# 빌드는 `ctf` 가 한다 — 프록시가 `POST /build` 를 거부한다(`HOST_EXCEPTIONS.md` §2.1.b).
+#
+#     ctf$ docker build -t kisia/worker-a:1 images/worker/
+#     ctf$ docker image inspect kisia/worker-a:1 --format '{{.Id}}'
+images:
+  worker-a:
+    built_at: '2026-08-08T11:00:00Z'
+    built_by: ctf
+    digest: sha256:49a321f3f86522c3ea5111f9fe99e0770c5af2749fb63ac91c3a85b31b97af33
+    reference: kisia/worker-a:1
+    dockerfile: images/worker/Dockerfile
+    base: ubuntu:24.04
+    profile: type-A golden
+    contains:
+      - binutils   # strings — 유형 A 관찰 1
+      - python3    # 관찰 2 집계, P-S2-c
+    excludes:
+      # vendored 컨테이너 자산과 pwntools 는 유형 B 이미지의 것이다
+      # (`PATH_SCOPE.md` §2.3, `LICENSE_MATRIX.md` §5.4.5).
+      - pwntools
+      - vendor/_connect.py
+      - vendor/server_connection.sh
+
+  # 유형 B (세션). **worker-a 를 고치지 않고 새 이미지를 만들었다** — 재빌드-4 의 골든 A
+  # 가 `sha256:49a321f3…` 위에서 8칸 PASS 를 받았고 그 스트림이 재현 가능해야 한다.
+  #
+  #     ctf$ docker build -t kisia/worker-b:1 images/worker-b/   (+ vendored 자산 둘)
+  worker-b:
+    built_at: '2026-08-08T21:37:00Z'
+    built_by: ctf
+    digest: sha256:451558c5d7333e6b574572e2469e8e59ac56426aff9d956a162f723c603d5894
+    reference: kisia/worker-b:1
+    dockerfile: images/worker-b/Dockerfile
+    base: ubuntu:24.04
+    profile: type-B golden (session)
+    contains:
+      - binutils              # 유형 A 와 같은 도구 계층을 유지한다
+      - python3               # 세션 리더(pty)와 P-S2-c
+      - python3-pwntools      # 4.12.0-1 — `_connect.py` 의 `from pwn import *`
+      - python3-setproctitle  # 1.3.3-1build2 — 같은 파일의 import
+      - procps                # 진단용 ps. **판정에 쓰지 않는다** (생존자는 호스트 /proc)
+    bakes:
+      # 마운트하지 않고 굽는다 — `PATH_SCOPE.md` §2.3-1.
+      - path: /opt/kisia/session/_connect.py
+        sha256: a31f4a493344941fff380f45a3112f35469cd8510d6ef3b02039a84866cdcf69
+      - path: /opt/kisia/session/server_connection.sh
+        sha256: fd09560680017ab5991412c36fcbb932f5e281db0f7ad1c2163248a817c30907
+    notes:
+      # 접지 않고 적는다: pwntools 의 의존 닫힘이 `python3-pip` 을 끌고 들어왔다.
+      # 런타임에 무엇을 설치하지는 않지만(내부 네트워크라 egress 가 없다) 그 경로가
+      # 이미지 안에 존재한다는 사실은 `PATH_SCOPE.md` §2.3-3 이 막으려는 것에 닿는다.
+      - python3-pip 이 python3-pwntools 의 의존으로 함께 들어왔다 (LICENSE_MATRIX §5.4.5)
+
+  # 챌린지 서비스. worker 가 아니라 **선언된 대상**이고, 내부 네트워크에만 뜬다
+  # (`PATH_SCOPE.md` §4.2). 컨테이너 이름은 `kisia-r5-fix-b` 이고 매니페스트의
+  # `target.host`(`kisia-fix-b`)는 **네트워크 별칭**으로 만든다 — 그 이름을 스파이크의
+  # 정지된 컨테이너가 쥐고 있고 프록시가 남의 것에 대한 rm 을 거부한다(재빌드-5 §2).
+  fix-b-service:
+    built_at: '2026-08-08T21:44:00Z'
+    built_by: ctf
+    digest: sha256:e5bd97aea8e52c73a3a088d1acb5f47804f6379b114f090b413bd53ee64c64fa
+    reference: kisia/fix-b-service:1
+    dockerfile: docs/spike/fixtures/b-session/service/Dockerfile
+    base: ubuntu:24.04
+    profile: type-B challenge service
+    contains:
+      - python3
+
+  # 유형 C (웹) 챌린지 서비스. 배치는 `fix-b-service` 와 같다 — 내부 네트워크에만 뜨고
+  # 컨테이너 이름(`kisia-r6-fix-c`)과 DNS 이름(`kisia-fix-c`)을 가른다 (D-31).
+  #
+  #     ctf$ docker build -t kisia/fix-c-service:1 <c-web/service>
+  fix-c-service:
+    built_at: '2026-08-09T00:42:00Z'
+    built_by: ctf
+    digest: sha256:d1e24dd47c3eb0cc63411caa625551bf0eab4746cf1ab366df4fd1a2b8cc3e7c
+    reference: kisia/fix-c-service:1
+    dockerfile: docs/spike/fixtures/c-web/service/Dockerfile
+    base: ubuntu:24.04
+    profile: type-C challenge service
+    contains:
+      - python3
+    source_sha256:
+      # 빌드 컨텍스트로 보낸 두 파일. 매니페스트 봉인값이 아니라 **입력물 바이트**의
+      # 대조이고, 워크스테이션과 호스트에서 같은 값이 나온 것을 확인했다.
+      app.py: b5b081a1b50680d6399329324358ed36b9b9380046c389b6b1a1f2c07b28d4f3
+      Dockerfile: 4f87d0de630c485e91236d48206dd3ba28c01fbcaad0d06d9f86345c5110905f
+
+  # **유형 C 는 worker 이미지를 새로 만들지 않았다.** 재빌드-6 부팅 프롬프트 §3.1 이
+  # "이미지 하나 더 필요할 수 있다(curl 또는 httpreq.py)"고 예상했으나 **실현되지
+  # 않았다** — 진단 3이 `kisia/worker-a:1` 의 python3 와 stdlib `http.cookiejar` 만으로
+  # 전부 선다는 것을 보였다. 예상과 실적을 접지 않고 여기 적는다 (경고 9, `O-10` 과
+  # 같은 형태). 도구 계층(`httpreq.py`)은 굽지 않고 `/work` 에 넣는다 — 유형 A 골든이
+  # 통과한 `sha256:49a321f3…` 를 움직이지 않기 위해서다.

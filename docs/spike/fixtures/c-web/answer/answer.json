@@ -1,0 +1,10 @@
+{
+  "challenge_id": "kisia-fix-c-web",
+  "flag": "kisia{7a2e_d0416b93}",
+  "flag_sha256": "fa588c504cde7ea1a3286473330ab8648a529f00a0a2f591389c4089673c0053",
+  "parts": {
+    "from_login": "7a2e",
+    "from_vault": "d0416b93"
+  },
+  "note": "호스트 전용. 이 경로는 worker에 마운트되지 않는다 (S8). service/app.py 의 ZONE/PART 와 일치해야 하며, 그 일치는 골든 트라젝토리가 통과하는 것으로 증명된다."
+}

@@ -1,0 +1,5 @@
+# manifest.json 의 sha256 은 `attempt.started.challenge_manifest_sha256` 의 봉인값이고
+# 이벤트 스트림은 세션 C가 재생할 원본이다. 줄바꿈이 체크아웃 플랫폼마다 바뀌면 그 해시가
+# 달라져 재현 대조가 깨진다. 이 두 트리는 어디서 체크아웃해도 LF 로 고정한다.
+fixtures/** text eol=lf
+golden/**   text eol=lf

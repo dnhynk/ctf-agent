@@ -1,0 +1,11 @@
+{
+  "challenge_id": "kisia-fix-a-static",
+  "flag": "kisia{5o9v_1472742}",
+  "flag_sha256": "4a47294e8c65132f31fe863d45a7afed87f716ae63f98517070c3bd9431978c1",
+  "parts": {
+    "from_notes_bin": "5o9v",
+    "from_ledger_csv": "1472742"
+  },
+  "seed": 20260807,
+  "note": "호스트 전용. 이 경로는 worker에 마운트되지 않는다 (S8)."
+}

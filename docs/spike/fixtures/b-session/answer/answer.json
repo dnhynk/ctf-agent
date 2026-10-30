@@ -1,0 +1,10 @@
+{
+  "challenge_id": "kisia-fix-b-session",
+  "flag": "kisia{c41d_9e2f7b06}",
+  "flag_sha256": "355e67493751e3e571bf09e3cac8680e4a4020ede7fc01a195c7a07b9208aafb",
+  "parts": {
+    "from_banner": "c41d",
+    "from_READ": "9e2f7b06"
+  },
+  "note": "호스트 전용. 이 경로는 worker에 마운트되지 않는다 (S8). service/server.py 의 ZONE/PART 와 일치해야 하며, 그 일치는 골든 트라젝토리가 통과하는 것으로 증명된다 — 어긋나면 verifier가 거부한다."
+}

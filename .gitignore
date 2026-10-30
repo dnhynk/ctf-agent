@@ -1,0 +1,43 @@
+# Secrets
+.env
+.env.*
+!.env.example
+secrets.env
+secrets/
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Runtime data: canonical JSONL events, rebuildable projections, artifacts, worker scratch
+/var/
+/data/
+/runs/
+/artifacts/
+*.sqlite
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+
+# Run exports
+phase-a-run.tar.gz
+
+# Local tooling and scratch
+/.vscode/
+/.idea/
+/work/
+/outputs/
+.DS_Store
+Thumbs.db

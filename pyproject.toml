@@ -1,0 +1,111 @@
+[project]
+name = "kisia-agent"
+version = "0.1.0"
+description = "KISIA CTF harness: challenge intake, isolated execution and auditable attempt records"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "typer>=0.12",
+    "rich>=13.7",
+    "sqlalchemy>=2.0.30",
+    "aiosqlite>=0.20",
+    "alembic>=1.13",
+    "uuid6>=2024.7.10",
+    "pyyaml>=6.0",
+    "openai>=1.60",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "types-pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kisia"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# 프로토타입 트리(`src`/`tests`)는 재빌드-9가 지웠다. 남은 소스는 재빌드 트리뿐이다
+# (docs/spec/PATH_SCOPE.md §3.2, 개정 R5-7).
+src = ["."]
+# `vendor/` 는 upstream 의 바이트 그대로다. 린터가 그 안을 보면 "고칠 것"이 97개 나오고,
+# 그것을 고치는 순간 SEAM_IMPLEMENTATION_MAP §3.1("수정 없이")과 §5(대장)이 함께 깨진다.
+# 등재된 패치로만 만지는 트리이므로 도구가 애초에 닿지 않게 한다.
+# `docs/spike/` 는 읽기 전용 증거다(PATH_SCOPE §3). 린터가 그 안을 보면 604건이 나오고,
+# `--fix` 한 번이면 evidence pack 이 인용하는 fixture 바이트가 조용히 바뀐다. 재빌드-4 때
+# 포매터가 HOST_EXCEPTIONS.md 의 절 셋을 실제로 지웠다 — `vendor` 와 같은 이유로 막는다.
+extend-exclude = ["vendor", "docs/spike"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # import sorting
+    "N",      # naming
+    "UP",     # pyupgrade
+    "B",      # bugbear
+    "SIM",    # simplify
+    "RUF",    # ruff-specific
+    "ASYNC",  # async correctness
+    "PTH",    # pathlib over os.path
+    "S",      # bandit: security-relevant constructs
+]
+ignore = [
+    "S101",  # assert: allowed, but production code uses explicit raises (see per-file-ignores)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"kisia_tests/**" = ["S", "N802"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["kisia", "kisia_tests"]
+
+[tool.mypy]
+python_version = "3.12"
+# 제품이 도는 곳은 리눅스다. 개발 기계(Windows 워크스테이션)를 기준으로 검사하면
+# `socket.AF_UNIX`·`grp`·`os.chown` 이 "없는 속성"이 되어 `kisia/proxy/` 가 통째로
+# 검사되지 않는다 — docs/spec/PATH_SCOPE.md §4.3(R3-14)이 가른 그 축이다. 배포 대상
+# 플랫폼으로 검사하는 것이 맞고, 나머지 트리는 플랫폼 독립이라 영향받지 않는다.
+platform = "linux"
+strict = true
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+disallow_any_unimported = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["uuid6.*"]
+ignore_missing_imports = true
+
+# `vendor/` 는 upstream 의 바이트 그대로다. ruff 의 `extend-exclude` 와 **같은 이유**로
+# 타입 검사기의 지적도 받지 않는다 — §4 어댑터가 vendored 심볼을 import 하는 순간 mypy 가
+# 그 트리를 따라 들어가 83건을 내고(실측, 재빌드-5), 그것을 고치는 순간
+# SEAM_IMPLEMENTATION_MAP §3.1("수정 없이")과 §5(대장)가 함께 깨진다.
+# `ignore_missing_imports` 가 아니라 `ignore_errors` 다 — 심볼은 **따라가서** 해소되어야
+# 하고(그러지 않으면 어댑터 쪽이 Any 로 뭉개진다) 지적만 끈다.
+[[tool.mypy.overrides]]
+module = ["vendor.*"]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["kisia_tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-q --strict-markers"
+markers = [
+    "unit: pure logic, no external dependency",
+    "contract: fakes and recorded fixtures only",
+]

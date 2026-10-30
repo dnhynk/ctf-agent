@@ -1,0 +1,130 @@
+# Provisional routing candidates. These identifiers are configuration candidates, not confirmed
+# account entitlements.
+#
+# 정정 2026-08-09 — 운영자 승인, 재빌드-7. 이 머리말의 세 문장이 낡아 있었다. 원문은
+# `git show 94a6abb:config/models.yaml` 이고, 값(roles·models)은 한 줄도 건드리지 않았다.
+#
+#  1. "copied from docs/spec/openai-models.md section 3" — **그 문서는 존재하지 않는다.**
+#     정당화된 적 없는 아키텍처에 독자를 묶는다는 이유로 삭제된 `docs/spec/` 11개 중
+#     하나다(`CLAUDE.md` §9). 따라서 이 파일이 후보 집합의 유일한 현존 진술이다.
+#  2. "NYU development evaluation (Phase D) decides the final router" — 두 군데가 틀렸다.
+#     `Phase D` 는 프로토타입 시절 단계 어휘이고 지금의 단계 이름(스파이크 / 재빌드 /
+#     성능)과 매핑되지 않는다. 그리고 **NYU 데이터셋 반입은 금지돼 있다** —
+#     `SAFETY_SCOPE.md` 의 `allow_vps=false`, `HOST_EXCEPTIONS.md` §2.6.
+#  3. "Phase A uses `balanced_solver` only" — 같은 어휘 문제.
+#
+# 지금 성립하는 것: **최종 라우터는 성능 단계가 정한다.** 그 앞에 후속 gate 2·3
+# (`SEAM_IMPLEMENTATION_MAP.md` §7.1)이 있고, gate 2 가 요구하는 nontrivial clean fixture 는
+# `HOLDOUT.md` §6-1 대로 **아직 존재하지 않는다**(두 세트가 비어 있고 챌린지 저작은 성능
+# 단계의 일이다). 그리고 `ADR-0001` 의 `not_valid_for` 가 `final model selection` 을 명시로
+# 배제하므로, 재빌드가 낸 어떤 수치도 이 파일의 역할 배정을 정하는 근거가 되지 못한다.
+#
+# 이 파일은 재빌드에게 **읽기 전용 입력**이다(`PATH_SCOPE.md` §3). 위 정정은 문면만
+# 고쳤고 그 권한은 운영자 승인에서 온다.
+#
+# ---------------------------------------------------------------------------
+# 개정 `R5-8` — 2026-08-09, 프로덕션-2. **값(roles·models)을 처음으로 고쳤다.**
+#
+# 위 정정 블록의 마지막 문장("최종 라우터는 성능 단계가 정한다")은 **이 개정으로
+# 대체된다.** 지우지 않고 남기는 이유는 `ADR-0001` §Correction·`ADR-0002` §Correction 이
+# 세운 자세다 — 그 시점에 무엇을 정했는지의 기록이고, 뒤에서 지우면 사전 등록의 의미가
+# 사라진다.
+#
+# **누가 정했나.** 운영자(2026-08-09). 부팅 프롬프트 §3.5 가 *"대회에 쓸 모델을 정하는
+# 순간 다섯을 운영자에게 가져와 결정을 받는다"* 고 요구했고, 프로덕션-2 가 신호를 보내
+# 운영자가 근거를 제시했다. 전문은 `REBUILD_LOG.md` 프로덕션-2 §7.
+#
+# **무엇이 이 배정을 정당화하지 *않는가* — `ADR-0001` 의 `not_valid_for` 는 그대로다.**
+#   - 이 저장소가 낸 어떤 수치도 근거가 아니다. 재빌드-7의 terra $0.0075/attempt ·
+#     luna $0.0009/attempt 와 프로덕션-1의 유형 A $0.0055~0.0086 · B $0.0135 ·
+#     C $0.0055 는 전부 **trivial fixture 위의 것**이다(`ADR-0001` §Correction).
+#   - 후속 gate 2 는 여전히 열리지 않았다 — 존재하지 않는 fixture 를 요구한다
+#     (`HOLDOUT.md` §6-1). **즉 이 배정은 이 저장소의 측정 위에 서 있지 않다.**
+#   - 근거는 **벤더가 공개한 평가와 공개 단가표**이고, 운영자가 그 사실과 함께
+#     *"해당 cyber 평가는 reduced safeguards 환경에서 진행됐으므로 실제 공개 API
+#     성공률이나 거부율과 동일하다고 보면 안 된다"* 는 단서를 스스로 달았다.
+#     **그 단서를 접지 않는다.**
+#
+# **`gpt-5.3-codex` 를 폐기한다.** 운영자 결정이고, 이 저장소에 **독립된 근거가 하나 더**
+# 있다 — `config/pricing.openai.yaml` 머리말이 *"cache-write rate 가 공개돼 있지 않아
+# 일부러 뺐다. 선택하면 `CONFIG_INVALID_PRICING` 으로 죽는다"* 고 적는다. 즉 codex 는
+# `S3.2`(cache_write_tokens 회계)를 **애초에 통과할 수 없었다.** 벤치마크와 무관하게
+# 이 역할표에 있을 수 없는 값이었다.
+#
+# **`fallbacks` 는 승격이 아니다.** 운영자의 승격 정책(Luna→Terra→Sol)은 **스케줄러의
+# 축**이고, 여기의 `fallbacks` 는 **provider 과부하 시의 대체**다. 둘을 한 필드에 실으면
+# "왜 이 모델이 돌았나"가 두 뜻이 된다. 그래서 전부 `[]` 로 두고 승격은 스케줄러가
+# 정한다 — 그 기본값은 `calibration@1` 뒤에 풀린다(`ADR-0003` §4).
+#
+# **`reasoning.mode: "pro"` 는 아직 보낼 수 없다.** `kisia/runtime/model.py:211` 의
+# 페이로드가 `{"effort": sent_effort}` 하나다(실측). `final` 역할의 pro/xhigh A/B 는
+# 전송 계층 변경이 선행하고 이 파일은 그것을 선언하지 않는다.
+#
+# **실측이 이 표를 받쳤다.** `capability-probes/openai-responses-effort-matrix-2026-08-09.json`
+# — 세 모델 × {low, medium, high, xhigh, max} × 도구 유무 = **30칸 전부 200**, 요청한
+# effort 와 관측된 effort **전부 일치**, FAIL 0. 그 전에는 `gpt-5.6-sol` 의 칸이 **하나도
+# 없었고**, `probe_snapshot()` 이 그 자리에서 죽는다(`agent_a.py:165-180`, `ADR-0001` §4).
+# **고르는 것만으로는 돌지 않았고, 이제 돈다.**
+# ---------------------------------------------------------------------------
+schema_version: 1
+roles:
+  # 보조 워커 — 파일 목록화, 로그 요약, 문자열 필터링, 플래그 형식 검사.
+  # 운영자 표는 low 또는 medium 을 적었고 제시된 PROFILES 는 medium 이다.
+  worker:
+    model: gpt-5.6-luna
+    reasoning_effort: medium
+    fallbacks: []
+  # 메인 솔버 — 공격면 분석, 가설 수립, 도구 선택. 운영자가 "실질적 기본값"으로 적었다.
+  solver:
+    model: gpt-5.6-terra
+    reasoning_effort: high
+    fallbacks: []
+  # 반복 실행 — 계획이 정해진 뒤 명령 실행·수정·재시험 구간.
+  executor:
+    model: gpt-5.6-terra
+    reasoning_effort: medium
+    fallbacks: []
+  # 난제 승격 — 복잡한 pwn·바이너리 분석·취약점 체이닝·다중 가설 비교.
+  escalation:
+    model: gpt-5.6-sol
+    reasoning_effort: xhigh
+    fallbacks: []
+  # 최종 승격 — 시간보다 성공률이 중요한 마지막 시도.
+  # 운영자는 standard/max 와 pro/xhigh 의 A/B 를 권했다. pro 는 위 머리말대로 아직 보낼
+  # 수 없으므로 여기는 standard 쪽만 선언한다.
+  final:
+    model: gpt-5.6-sol
+    reasoning_effort: max
+    fallbacks: []
+
+# Capability metadata, read from the provider's model pages on 2026-08-05. The context thresholds
+# in openai-models.md section 6 are measured against `max_input_tokens`, not the context window:
+# for gpt-5.6-terra the window is 1,050,000 while input is capped at 922,000, so dividing by the
+# window would report a comfortable ratio for a request the provider would refuse.
+#
+# Every model the roles above can select is listed. A model with no entry here fails at attempt
+# start rather than running against a guessed limit, so an addition to `roles` needs one here too.
+models:
+  # https://developers.openai.com/api/docs/models/gpt-5.6-terra
+  gpt-5.6-terra:
+    context_window_tokens: 1050000
+    max_input_tokens: 922000
+  # https://developers.openai.com/api/docs/models/gpt-5.6-luna
+  gpt-5.6-luna:
+    context_window_tokens: 1050000
+    max_input_tokens: 922000
+  # https://developers.openai.com/api/docs/models/gpt-5.6-sol
+  gpt-5.6-sol:
+    context_window_tokens: 1050000
+    max_input_tokens: 922000
+
+# `gpt-5.3-codex` 를 이 표에서도 뺐다 (`R5-8`). 어느 role 도 그것을 고를 수 없으므로 위
+# 규칙("roles 가 고를 수 있는 모든 모델을 여기 싣는다")에 따라 항목이 남을 이유가 없다.
+# 값은 이력으로 `git show ffed426:config/models.yaml` 에 있다 —
+# `context_window_tokens: 400000`, `max_input_tokens: 272000`.
+#
+# **파생 하나:** 남은 셋의 `max_input_tokens` 가 **전부 922,000 으로 같아졌다.** codex 만
+# 272,000 이었고, `TELEMETRY_SCHEMA.md` §2.1 이 그 비대칭을 "S3.4 의 재과금 경계가
+# 모델마다 다르다"로 적었다. **그 비대칭은 이제 없다** — 경계가 셋 다 같은 자리다.
+# 운영자가 지적한 장문 컨텍스트 과금(초과 시 입력 2배·출력 1.5배)은 그 하나의 경계에서
+# 발동하고, 그것이 `S3.4` 가 재는 것이다.

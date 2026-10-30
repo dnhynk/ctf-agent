@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v6
+
+      # Python 3.12 comes from .python-version. --locked fails if uv.lock is stale.
+      - run: uv sync --locked
+
+      - run: uv run pytest
+
+      - run: uv run ruff check kisia kisia_tests
+
+      - run: uv run mypy kisia

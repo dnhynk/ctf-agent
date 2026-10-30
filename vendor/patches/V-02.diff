@@ -1,0 +1,15 @@
+--- a/sweagent/agent/interactive_commands.py
++++ b/sweagent/agent/interactive_commands.py
+@@ -3,11 +3,9 @@
+ import subprocess
+ from dataclasses import dataclass, field
+ 
+-from simple_parsing.helpers.serialization.serializable import FrozenSerializable
+-
+ 
+ @dataclass(frozen=True)
+-class InteractiveSessionConfig(FrozenSerializable):
++class InteractiveSessionConfig:
+     cmdline: str
+     terminal_prompt_pattern: str
+     start_command: str
