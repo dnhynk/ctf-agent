@@ -85,8 +85,6 @@ Live attempts need a Linux host with Docker, the socket proxy in front of the Do
 
 Personal project, solo, August 2026. It was built for the 2026 KISIA CTF, run by the Korea Information Security Industry Association, which is where the package name `kisia` comes from.
 
-I set the objective, approved the evaluation contract, the safety scope, every change to them and the foundation decision, and required every claim that something works to come with the command and its output. AI coding agents, mainly Claude Code, wrote most of the code and documents under those rules. [AGENTS.md](AGENTS.md) keeps the short version.
-
 ## License
 
 MIT ([LICENSE](LICENSE)). `vendor/swe_agent_dc18a740/` is a partial copy of SWE-agent v0.7.0 under its own MIT license.
